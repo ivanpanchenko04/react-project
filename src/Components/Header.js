@@ -7,8 +7,13 @@ import {
     Form,
     Button
 } from "react-bootstrap";
+import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
+import logo from "../img/logo192.png";
+import Home from '../Pages/Home';
+import Contacts from '../Pages/Contacts';
+import About from '../Pages/About';
+import Blog from '../Pages/Blog';
 
-import logo from "./logo192.png";
 
 export default class Header extends Component {
     render() {
@@ -44,6 +49,15 @@ export default class Header extends Component {
                         </Navbar.Collapse>
                     </Container>
                 </Navbar>
+                <Router>
+                    <Routes>
+                        <Route path="/" element={<Home  />}/>
+                        <Route path="/about" element={<About/>}/>
+                        <Route path="/contacts" element={<Contacts/>}/>
+                        <Route path="/blog" element={<Blog/>}/>
+                    </Routes>
+                </Router>
+
             </>
         )
     }
