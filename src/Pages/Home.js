@@ -40,7 +40,6 @@ class Home extends Component {
                                 </Card.Body>
                             </Card>
                         </div>
-
                         <div className="col">
                             <Card className="m-4 text-center" bg="light">
                                 <Card.Img

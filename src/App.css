@@ -40,3 +40,8 @@
 .container {
   margin-top: 5px;
 }
+
+.row {
+  margin-left: 40px;
+  margin-right: 40px;
+}
