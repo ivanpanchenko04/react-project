@@ -14,7 +14,6 @@ import Contacts from '../Pages/Contacts';
 import About from '../Pages/About';
 import Blog from '../Pages/Blog';
 
-
 export default class Header extends Component {
     render() {
         return (
@@ -57,7 +56,6 @@ export default class Header extends Component {
                         <Route path="/blog" element={<Blog/>}/>
                     </Routes>
                 </Router>
-
             </>
         )
     }
