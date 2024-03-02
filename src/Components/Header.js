@@ -6,6 +6,7 @@ import Home from '../Pages/Home';
 import Contacts from '../Pages/Contacts';
 import About from '../Pages/About';
 import Blog from '../Pages/Blog';
+import TeamDetails from "../Pages/TeamDetails";
 
 export default function Header() {
     const [show, setShow] = useState(false);
@@ -135,6 +136,7 @@ export default function Header() {
                     <Route path="/about" element={<About/>}/>
                     <Route path="/contacts" element={<Contacts/>}/>
                     <Route path="/blog" element={<Blog/>}/>
+                    <Route path="/team/:id" element={<TeamDetails/>} />
                 </Routes>
             </Router>
         </>
