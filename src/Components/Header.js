@@ -7,6 +7,7 @@ import Contacts from '../Pages/Contacts';
 import About from '../Pages/About';
 import Blog from '../Pages/Blog';
 import TeamDetails from "../Pages/TeamDetails";
+import Post from "../Pages/Post";
 
 export default function Header() {
     const [show, setShow] = useState(false);
@@ -136,7 +137,8 @@ export default function Header() {
                     <Route path="/about" element={<About/>}/>
                     <Route path="/contacts" element={<Contacts/>}/>
                     <Route path="/blog" element={<Blog/>}/>
-                    <Route path="/team/:id" element={<TeamDetails/>} />
+                    <Route path="/team/:id" element={<TeamDetails/>}/>
+                    <Route path="/post/:id" element={<Post/>}/>
                 </Routes>
             </Router>
         </>
