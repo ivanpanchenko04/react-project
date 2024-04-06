@@ -1,16 +1,41 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Card, Col, ListGroup, Row} from "react-bootstrap";
-import post1 from "../img/post1.jpg";
-import post2 from "../img/post2.jpeg";
-import post3 from "../img/post3.jpeg";
 import {Link} from "react-router-dom";
+import {getFirestore, collection, getDocs} from 'firebase/firestore';
+import { initializeApp } from "firebase/app";
 
 function Blog() {
-    const posts = [
-        {id: 1, image: post1, title: "Post #1", text: "First post in this blog"},
-        {id: 2, image: post2, title: "Post #2", text: "Another post"},
-        {id: 3, image: post3, title: "Post #3", text: "One more post"}
-    ]
+    const firebaseConfig = {
+        apiKey: "AIzaSyBP3EK6mQWdhdT0njW1PnP7Z6nPv6AzvUU",
+        authDomain: "frontendlab5.firebaseapp.com",
+        projectId: "frontendlab5",
+        storageBucket: "frontendlab5.appspot.com",
+        messagingSenderId: "201245358397",
+        appId: "1:201245358397:web:e47117fe7d22abafeaed54",
+        measurementId: "G-CSDR9GK46R"
+    };
+    initializeApp(firebaseConfig);
+    const data = getFirestore();
+
+    const [posts, setPosts] = useState([]);
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    function fetchData() {
+        const collectionRef = collection(data, 'blog');
+        getDocs(collectionRef)
+            .then(snapshot => {
+                let postsData = [];
+                snapshot.docs.forEach(doc => {
+                    postsData.push({ id: doc.id, ...doc.data() });
+                });
+                setPosts(postsData);
+            })
+            .catch(error => {
+                console.error("Error getting documents: ", error);
+            });
+    }
 
     return (
         <Row style={{marginRight: 60 + 'px', marginLeft: 60 + 'px'}}>
@@ -30,7 +55,7 @@ function Blog() {
                                 <h5>{post.title}</h5>
                             </Link>
                             <p>
-                                {post.text}
+                                {post.details}
                             </p>
                         </div>
                     </div>
