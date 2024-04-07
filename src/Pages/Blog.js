@@ -1,45 +1,44 @@
 import React, {useEffect, useState} from 'react';
 import {Card, Col, ListGroup, Row} from "react-bootstrap";
 import {Link} from "react-router-dom";
-import {getFirestore, collection, getDocs} from 'firebase/firestore';
-import { initializeApp } from "firebase/app";
+import {getFirestore, collection, getDocs, query, orderBy} from 'firebase/firestore';
 
-function Blog() {
-    const firebaseConfig = {
-        apiKey: "AIzaSyBP3EK6mQWdhdT0njW1PnP7Z6nPv6AzvUU",
-        authDomain: "frontendlab5.firebaseapp.com",
-        projectId: "frontendlab5",
-        storageBucket: "frontendlab5.appspot.com",
-        messagingSenderId: "201245358397",
-        appId: "1:201245358397:web:e47117fe7d22abafeaed54",
-        measurementId: "G-CSDR9GK46R"
-    };
-    initializeApp(firebaseConfig);
+export default function Blog() {
     const data = getFirestore();
 
     const [posts, setPosts] = useState([]);
+    const [sortBy, setSortBy] = useState(null);
+
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [sortBy]);
 
-    function fetchData() {
-        const collectionRef = collection(data, 'blog');
-        getDocs(collectionRef)
-            .then(snapshot => {
-                let postsData = [];
-                snapshot.docs.forEach(doc => {
-                    postsData.push({ id: doc.id, ...doc.data() });
-                });
-                setPosts(postsData);
-            })
-            .catch(error => {
-                console.error("Error getting documents: ", error);
-            });
+    const collectionRef = collection(data, 'blog');
+
+    const fetchData = async () => {
+        const data = await getDocs(query(collectionRef,
+           sortBy && orderBy("date", sortBy)));
+        let postsData = [];
+        data.docs.forEach(doc => {
+            postsData.push({ id: doc.id, ...doc.data() });
+        });
+        setPosts(postsData);
     }
+
+    const handleSort = (order) => {
+        setSortBy(order);
+        console.log(posts);
+    };
 
     return (
         <Row style={{marginRight: 60 + 'px', marginLeft: 60 + 'px'}}>
             <Col md="9">
+                <div className="d-flex justify-content-end mt-2">
+                    <button onClick={() => handleSort('asc')}
+                            className="btn btn-primary mr-auto">Дата ↑</button>
+                    <button onClick={() => handleSort('desc')}
+                            className="btn btn-primary mx-2">Дата ↓</button>
+                </div>
                 {posts.map((post, index) => (
                     <div className="d-flex align-items-center me-5 m-4" key={index}>
                         <div className="flex-shrink-0">
@@ -84,5 +83,3 @@ function Blog() {
         </Row>
     );
 }
-
-export default Blog;
