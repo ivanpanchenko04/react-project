@@ -1,13 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import {Card, Col, ListGroup, Row} from "react-bootstrap";
-import {Link} from "react-router-dom";
-import {getFirestore, collection, getDocs, query, orderBy} from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Card, Col, ListGroup, Row } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 export default function Blog() {
     const data = getFirestore();
 
     const [posts, setPosts] = useState([]);
     const [sortBy, setSortBy] = useState(null);
+    const [ratings, setRatings] = useState({}); // стан для зберігання оцінок
 
     useEffect(() => {
         fetchData();
@@ -17,7 +18,7 @@ export default function Blog() {
 
     const fetchData = async () => {
         const data = await getDocs(query(collectionRef,
-           sortBy && orderBy("date", sortBy)));
+            sortBy && orderBy("date", sortBy)));
         let postsData = [];
         data.docs.forEach(doc => {
             postsData.push({ id: doc.id, ...doc.data() });
@@ -27,11 +28,17 @@ export default function Blog() {
 
     const handleSort = (order) => {
         setSortBy(order);
-        console.log(posts);
+    };
+
+    const handleRating = (postId, rating) => {
+        setRatings(prevRatings => ({
+            ...prevRatings,
+            [postId]: rating
+        }));
     };
 
     return (
-        <Row style={{marginRight: 60 + 'px', marginLeft: 60 + 'px'}}>
+        <Row style={{ marginRight: 60 + 'px', marginLeft: 60 + 'px' }}>
             <Col md="9">
                 <div className="d-flex justify-content-end mt-2">
                     <button onClick={() => handleSort('asc')}
@@ -47,15 +54,24 @@ export default function Blog() {
                                 height={150}
                                 className="mr-3"
                                 src={post.image}
-                                alt="photo"/>
+                                alt="photo" />
                         </div>
                         <div className="flex-grow-1 ms-3">
-                            <Link to={`/post/${post.id}`} style={{color: "black", textDecoration: "none"}}>
+                            <Link to={`/post/${post.id}`} style={{ color: "black", textDecoration: "none" }}>
                                 <h5>{post.title}</h5>
                             </Link>
-                            <p>
-                                {post.details}
-                            </p>
+                            <p>{post.details}</p>
+                            <div>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <span
+                                        key={star}
+                                        onClick={() => handleRating(post.id, star)}
+                                        style={{ cursor: 'pointer', color: ratings[post.id] >= star ? 'orange' : 'gray' }}
+                                    >
+                                        &#9733;
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -72,7 +88,7 @@ export default function Blog() {
                     </ListGroup>
                 </Card>
                 <Card className="mt-3 bg-light">
-                <Card.Body>
+                    <Card.Body>
                         <Card.Title>Slide widget</Card.Title>
                         <Card.Text>
                             Lorem
