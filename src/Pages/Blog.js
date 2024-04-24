@@ -1,24 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Col, ListGroup, Row } from "react-bootstrap";
+import { Col, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 
 export default function Blog() {
     const data = getFirestore();
 
     const [posts, setPosts] = useState([]);
     const [sortBy, setSortBy] = useState(null);
-    const [ratings, setRatings] = useState({}); // стан для зберігання оцінок
+    const [ratings, setRatings] = useState({});
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
     useEffect(() => {
         fetchData();
-    }, [sortBy]);
+    }, [sortBy, selectedCategory]);
 
     const collectionRef = collection(data, 'blog');
 
     const fetchData = async () => {
-        const data = await getDocs(query(collectionRef,
-            sortBy && orderBy("date", sortBy)));
+        let q = query(collectionRef, sortBy
+            && orderBy("date", sortBy));
+        if (selectedCategory) {
+            q = query(q, where("category", "==", selectedCategory));
+        }
+        const data = await getDocs(q);
         let postsData = [];
         data.docs.forEach(doc => {
             postsData.push({ id: doc.id, ...doc.data() });
@@ -37,6 +42,10 @@ export default function Blog() {
         }));
     };
 
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+    };
+
     return (
         <Row style={{ marginRight: 60 + 'px', marginLeft: 60 + 'px' }}>
             <Col md="9">
@@ -45,6 +54,25 @@ export default function Blog() {
                             className="btn btn-primary mr-auto">Дата ↑</button>
                     <button onClick={() => handleSort('desc')}
                             className="btn btn-primary mx-2">Дата ↓</button>
+                </div>
+                <div className="mt-3 mb-3">
+                    <span className="me-2">Фільтр за категоріями:</span>
+                    <button onClick={() => handleCategorySelect(null)}
+                            className={`btn btn-sm ${selectedCategory === null
+                                ? 'btn-primary' : 'btn-outline-primary'}`}>Усі
+                    </button>
+                    <button onClick={() => handleCategorySelect('Space')}
+                            className={`btn btn-sm ${selectedCategory === 'Space'
+                                ? 'btn-primary' : 'btn-outline-primary'}`}>Space
+                    </button>
+                    <button onClick={() => handleCategorySelect('IT')}
+                            className={`btn btn-sm ${selectedCategory === 'IT'
+                                ? 'btn-primary' : 'btn-outline-primary'}`}>IT
+                    </button>
+                    <button onClick={() => handleCategorySelect('Biology')}
+                            className={`btn btn-sm ${selectedCategory === 'Biology'
+                                ? 'btn-primary' : 'btn-outline-primary'}`}>Biology
+                    </button>
                 </div>
                 {posts.map((post, index) => (
                     <div className="d-flex align-items-center me-5 m-4" key={index}>
@@ -66,7 +94,8 @@ export default function Blog() {
                                     <span
                                         key={star}
                                         onClick={() => handleRating(post.id, star)}
-                                        style={{ cursor: 'pointer', color: ratings[post.id] >= star ? 'orange' : 'gray' }}
+                                        style={{ cursor: 'pointer', color: ratings[post.id] >= star ?
+                                                'orange' : 'gray' }}
                                     >
                                         &#9733;
                                     </span>
@@ -75,26 +104,6 @@ export default function Blog() {
                         </div>
                     </div>
                 ))}
-            </Col>
-            <Col md="3">
-                <h5 className="text-center mt-5">Категорії</h5>
-                <Card>
-                    <ListGroup variant="flush">
-                        <ListGroup.Item>категорія 1</ListGroup.Item>
-                        <ListGroup.Item>категорія 2</ListGroup.Item>
-                        <ListGroup.Item>категорія 3</ListGroup.Item>
-                        <ListGroup.Item>категорія 4</ListGroup.Item>
-                        <ListGroup.Item>категорія 5</ListGroup.Item>
-                    </ListGroup>
-                </Card>
-                <Card className="mt-3 bg-light">
-                    <Card.Body>
-                        <Card.Title>Slide widget</Card.Title>
-                        <Card.Text>
-                            Lorem
-                        </Card.Text>
-                    </Card.Body>
-                </Card>
             </Col>
         </Row>
     );
