@@ -2,18 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Col, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { getFirestore, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
+import LanguageSelector from '../Components/LanguageSelector';
 
 export default function Blog() {
     const data = getFirestore();
-
     const [posts, setPosts] = useState([]);
     const [sortBy, setSortBy] = useState(null);
     const [ratings, setRatings] = useState({});
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedLanguage, setSelectedLanguage] = useState('En');
 
     useEffect(() => {
         fetchData();
-    }, [sortBy, selectedCategory]);
+    }, [sortBy, selectedCategory, selectedLanguage]);
 
     const collectionRef = collection(data, 'blog');
 
@@ -21,12 +22,14 @@ export default function Blog() {
         let q = query(collectionRef, sortBy
             && orderBy("date", sortBy));
         if (selectedCategory) {
-            q = query(q, where("category", "==", selectedCategory));
+            q = query(q, where("category" + selectedLanguage, "==", selectedCategory));
         }
         const data = await getDocs(q);
         let postsData = [];
         data.docs.forEach(doc => {
-            postsData.push({ id: doc.id, ...doc.data() });
+            const title = doc.data()['title' + selectedLanguage];
+            const details = doc.data()['details' + selectedLanguage];
+            postsData.push({ id: doc.id, title, details, ...doc.data() });
         });
         setPosts(postsData);
     }
@@ -46,9 +49,14 @@ export default function Blog() {
         setSelectedCategory(category);
     };
 
+    const handleLanguageSelect = (language) => {
+        setSelectedLanguage(language);
+    };
+
     return (
         <Row style={{ marginRight: 60 + 'px', marginLeft: 60 + 'px' }}>
             <Col md="9">
+                <LanguageSelector onSelectLanguage={handleLanguageSelect}/>
                 <div className="d-flex justify-content-end mt-2">
                     <button onClick={() => handleSort('asc')}
                             className="btn btn-primary mr-auto">Дата ↑</button>
@@ -59,7 +67,7 @@ export default function Blog() {
                     <span className="me-2">Фільтр за категоріями:</span>
                     <button onClick={() => handleCategorySelect(null)}
                             className={`btn btn-sm ${selectedCategory === null
-                                ? 'btn-primary' : 'btn-outline-primary'}`}>Усі
+                                ? 'btn-primary' : 'btn-outline-primary'}`}>All
                     </button>
                     <button onClick={() => handleCategorySelect('Space')}
                             className={`btn btn-sm ${selectedCategory === 'Space'
@@ -89,6 +97,7 @@ export default function Blog() {
                                 <h5>{post.title}</h5>
                             </Link>
                             <p>{post.details}</p>
+                            <p>{post.category}</p>
                             <div>
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <span
